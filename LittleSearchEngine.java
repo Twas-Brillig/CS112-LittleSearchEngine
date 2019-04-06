@@ -77,6 +77,27 @@ public class LittleSearchEngine {
 	 */
 	public void mergeKeywords(HashMap<String,Occurrence> kws) {
 		/** COMPLETE THIS METHOD **/
+		for(Map.Entry<String,Occurrence> entry: kws.entrySet()) {
+			String entryKey = entry.getKey();
+			Occurrence entryValue = entry.getValue();
+			
+			if(!keywordsIndex.containsKey(entryKey)) {
+				
+				ArrayList<Occurrence> firstInstance = new ArrayList<Occurrence>();
+				firstInstance.add(entryValue);
+				keywordsIndex.put(entryKey, firstInstance);
+				
+				
+			} else {
+				//more than one occurrence of an object already established
+				
+				ArrayList<Integer> intList = insertLastOccurrence(keywordsIndex.get(entryKey));
+				int indexToReplace = intList.get(-1);
+				keywordsIndex.get(entryKey).add(indexToReplace,entryValue);
+				
+			}
+		//System.out.println("Key = " + entry.getKey() +", Value = " + entry.getValue());
+		}
 	}
 	
 	/**
@@ -146,11 +167,37 @@ public class LittleSearchEngine {
 	 *         your code - it is not used elsewhere in the program.
 	 */
 	public ArrayList<Integer> insertLastOccurrence(ArrayList<Occurrence> occs) {
-		/** COMPLETE THIS METHOD **/
+		if(occs.size() == 1 || occs.isEmpty()) {
+			return null;
+		}
+
+		ArrayList<Integer> integerList = new ArrayList<Integer>();
+		int left = 0;
+		int right = occs.size() - 2;
+		int target = occs.get(occs.size()-1).frequency;
 		
-		// following line is a placeholder to make the program compile
-		// you should modify it as needed when you write your code
-		return null;
+		
+		while(left <= right) {
+			
+			int mid = left + ((right-left) / 2);
+			integerList.add(mid);
+			
+			if(occs.get(mid).frequency == target) {
+				break;
+				
+			} else if (target < occs.get(mid).frequency) {
+				left = mid + 1;
+				
+			} else {
+				right = mid - 1;
+			}
+			
+		}
+		int indexToReplace = integerList.get(integerList.size()-1);
+		occs.add(indexToReplace, occs.remove(occs.size()-1));
+
+		
+		return integerList;
 	}
 	
 	/**
@@ -204,10 +251,71 @@ public class LittleSearchEngine {
 	 */
 	public ArrayList<String> top5search(String kw1, String kw2) {
 		/** COMPLETE THIS METHOD **/
+		ArrayList<String> docsWithKeywords = new ArrayList<String>();
+		ArrayList<Occurrence> precedenceCheck = new ArrayList<Occurrence>();
+		boolean updateIsNeeded = false;
 		
-		// following line is a placeholder to make the program compile
-		// you should modify it as needed when you write your code
-		return null;
+		//doesn't take into account repeat text files
+		kw1 = kw1.toLowerCase();
+		kw2 = kw2.toLowerCase();
+		
+		if(keywordsIndex.containsKey(kw1)) {
+			
+			for(Occurrence n:keywordsIndex.get(kw1)) {
+				if(docsWithKeywords.size() < 6) {
+					docsWithKeywords.add(n.document);
+					precedenceCheck.add(n);
+				}	
+			}
+		}
+		//start from the string of arraylists first
+		//if(docsWithKeywords.contains(k.document)
+		
+		if(keywordsIndex.containsKey(kw2)) {
+			//if kw1 was never found, this populates with kw2 occurrences instead
+			if(docsWithKeywords.isEmpty()) {
+				for(Occurrence k: keywordsIndex.get(kw2)) {
+					if(docsWithKeywords.size() < 6) {
+						docsWithKeywords.add(k.document);
+					}
+				}
+				
+			}
+			
+			//kw1 occurrences have to be mixed with kw2 occurrences
+			else {
+				updateIsNeeded = true;
+				for(Occurrence j: precedenceCheck) {
+					for(Occurrence x: keywordsIndex.get(kw2)) {
+						//move over with a higher frequency;
+						if(x.frequency > j.frequency) {
+							if(!x.document.equals(j.document)) {
+								for(Occurrence redundant: precedenceCheck) {
+									if(redundant.document.equals(x.document)) {
+										precedenceCheck.remove(redundant);
+									}
+								}
+								precedenceCheck.add(precedenceCheck.indexOf(j), x);
+								
+							} 
+						}
+						
+					}
+				}
+			}
+		}
+		if(updateIsNeeded) {
+			docsWithKeywords.clear();
+			for(Occurrence y: precedenceCheck) {
+				if(docsWithKeywords.size() < 6) {
+					docsWithKeywords.add(y.document);
+				}
+			}
+		}
+		
+		if(docsWithKeywords.isEmpty()) { return null; }
+		return docsWithKeywords;
+	}
 	
 	}
 }
