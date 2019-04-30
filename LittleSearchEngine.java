@@ -373,10 +373,11 @@ public class LittleSearchEngine {
 			for(Occurrence a: sortedOccurrences) {
 				occurrenceArray[r] = a;
 				r++;
-			}
+		}
 			
-			//bubble sort on the occurrence array 
-			int arrayLength = occurrenceArray.length; 
+		//bubble sort on the occurrence array 
+		int arrayLength = occurrenceArray.length; 
+			
 	        for (int i = 0; i < arrayLength-1; i++)  {
 	        	for (int j = 0; j < arrayLength-i-1; j++) {
 	            	if (occurrenceArray[j].frequency < occurrenceArray[j+1].frequency) { 
