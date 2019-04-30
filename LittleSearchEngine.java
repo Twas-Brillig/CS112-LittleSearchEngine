@@ -1,4 +1,4 @@
-package lse;
+	package lse;
 
 import java.io.*;
 import java.util.*;
@@ -6,7 +6,50 @@ import java.util.*;
 /**
  * This class builds an index of keywords. Each keyword maps to a set of pages in
  * which it occurs, with frequency of occurrence in each page.
+	 *’Twas brillig, and the slithy toves 
+	      Did gyre and gimble in the wabe: 
+	All mimsy were the borogoves, 
+	      And the mome raths outgrabe. 
+	
+	“Beware the Jabberwock, my son! 
+	      The jaws that bite, the claws that catch! 
+	Beware the Jubjub bird, and shun 
+	      The frumious Bandersnatch!” 
+	
+	He took his vorpal sword in hand; 
+	      Long time the manxome foe he sought— 
+	So rested he by the Tumtum tree 
+	      And stood awhile in thought. 
+	
+	And, as in uffish thought he stood, 
+	      The Jabberwock, with eyes of flame, 
+	Came whiffling through the tulgey wood, 
+	      And burbled as it came! 
+	
+	One, two! One, two! And through and through 
+	      The vorpal blade went snicker-snack! 
+	He left it dead, and with its head 
+	      He went galumphing back. 
+	
+	“And hast thou slain the Jabberwock? 
+	      Come to my arms, my beamish boy! 
+	O frabjous day! Callooh! Callay!” 
+	      He chortled in his joy. 
+	
+	’Twas brillig, and the slithy toves 
+	      Did gyre and gimble in the wabe: 
+	All mimsy were the borogoves, 
+	      And the mome raths outgrabe.
  *
+ *
+ *
+ *   Nelson Vargas
+ *   RUID: 184-00-3905
+ *   Netid: nvv11
+ *   Date: 4/16/19
+ *   FINAL VERSION TESTED
+ *   
+ *   
  */
 public class LittleSearchEngine {
 	
@@ -41,27 +84,31 @@ public class LittleSearchEngine {
 	 */
 	public HashMap<String,Occurrence> loadKeywordsFromDocument(String docFile) 
 	throws FileNotFoundException {
-		/** COMPLETE THIS METHOD **/
-		System.out.println("You're here!");
 		
-		Scanner noiseWordScan = new Scanner(new File("noisewords.txt"));
+		
+		//loads up either keywords or ignores a null when given a text file
 		Scanner docScanned = new Scanner(new File(docFile));
 		HashMap<String, Occurrence> keywordsDoc = new  HashMap<String, Occurrence>();
 		
 		while(docScanned.hasNext()) {
+			
 			String nextWord = docScanned.next();
-			if (!keywordsDoc.containsKey(nextWord)) {
-				keywordsDoc.put(getKeyword(nextWord), new Occurrence(docFile, 1));
+			String testedKeyWord = getKeyword(nextWord);
+			
+			if (testedKeyWord != null) {
+				
+				if(keywordsDoc.containsKey(testedKeyWord)) {
+					 
+					keywordsDoc.get(testedKeyWord).frequency++;
+					
+				} else {
+					
+					keywordsDoc.put(testedKeyWord, new Occurrence(docFile, 1));
+					
+				}
 			} 
-			else {
-				keywordsDoc.get(getKeyword(nextWord)).frequency += 1;
-			}
-			
-			
 		}
-		
-		// following line is a placeholder to make the program compile
-		// you should modify it as needed when you write your code
+		docScanned.close();
 		return keywordsDoc;
 	}
 
@@ -75,8 +122,10 @@ public class LittleSearchEngine {
 	 * 
 	 * @param kws Keywords hash table for a document
 	 */
+	
 	public void mergeKeywords(HashMap<String,Occurrence> kws) {
-		/** COMPLETE THIS METHOD **/
+		
+		// must implement the insertLastOccurence method
 		for(Map.Entry<String,Occurrence> entry: kws.entrySet()) {
 			String entryKey = entry.getKey();
 			Occurrence entryValue = entry.getValue();
@@ -91,14 +140,14 @@ public class LittleSearchEngine {
 			} else {
 				//more than one occurrence of an object already established
 				
-				ArrayList<Integer> intList = insertLastOccurrence(keywordsIndex.get(entryKey));
-				int indexToReplace = intList.get(-1);
-				keywordsIndex.get(entryKey).add(indexToReplace,entryValue);
-				
-			}
-		//System.out.println("Key = " + entry.getKey() +", Value = " + entry.getValue());
+				keywordsIndex.get(entryKey).add(entryValue);
+				insertLastOccurrence(keywordsIndex.get(entryKey));
+
+			}			
 		}
 	}
+	
+	
 	
 	/**
 	 * Given a word, returns it as a keyword if it passes the keyword test,
@@ -119,6 +168,8 @@ public class LittleSearchEngine {
 	 */
 	public String getKeyword(String word) {
 	
+		//Checks if all the punctuations are legal and filters out words w/ special characters
+		
 		String punctuations = ".,?:;!";
 		String excluded = "-'@#$%^&*(){}[]~`";
 		String lowerCaseCheck = word.toLowerCase();
@@ -126,7 +177,6 @@ public class LittleSearchEngine {
 		boolean punctuationsAreLegal  = true;
 		char[] wordAsCharArray = lowerCaseCheck.toCharArray();
 		
-		//Checks if all the punctuations are legal and filters out words w/ special characters
 		for(int i = 0; i < wordAsCharArray.length; i++) {
 			
 			if(punctuations.contains(Character.toString(wordAsCharArray[i])) &&
@@ -135,15 +185,16 @@ public class LittleSearchEngine {
 				if(Character.isLetter(wordAsCharArray[i + 1])) {
 					punctuationsAreLegal = false;
 				}
-			} else if(excluded.contains(Character.toString(wordAsCharArray[i]))) {
+				
+			}
+			
+			if(excluded.contains(Character.toString(wordAsCharArray[i]))) {
 				return null;
 			}
 			
 		}
-		 
-		//checks for numbers
+	
 		String edgeCaseCheck = lowerCaseCheck.replaceAll("\\s*\\p{Punct}+\\s*$", "");
-		
 		if(!noiseWords.contains(edgeCaseCheck) && !word.matches(".*\\d.*")
 		   && punctuationsAreLegal 
 		   && edgeCaseCheck.chars().allMatch(Character::isLetter)) {	
@@ -151,6 +202,7 @@ public class LittleSearchEngine {
 			return edgeCaseCheck;
 			
 		}
+		
 		return null;
 	}
 
@@ -167,6 +219,7 @@ public class LittleSearchEngine {
 	 *         your code - it is not used elsewhere in the program.
 	 */
 	public ArrayList<Integer> insertLastOccurrence(ArrayList<Occurrence> occs) {
+
 		if(occs.size() == 1 || occs.isEmpty()) {
 			return null;
 		}
@@ -193,9 +246,18 @@ public class LittleSearchEngine {
 			}
 			
 		}
+		
 		int indexToReplace = integerList.get(integerList.size()-1);
-		occs.add(indexToReplace, occs.remove(occs.size()-1));
-
+		
+		if(occs.get(indexToReplace).frequency <  target) {
+			
+			occs.add(indexToReplace, occs.remove(occs.size()-1));
+			
+		} else {
+			
+			occs.add(indexToReplace + 1, occs.remove(occs.size()-1));
+			
+		}
 		
 		return integerList;
 	}
@@ -226,6 +288,7 @@ public class LittleSearchEngine {
 			HashMap<String,Occurrence> kws = loadKeywordsFromDocument(docFile);
 			mergeKeywords(kws);
 		}
+		
 		sc.close();
 	}
 	
@@ -251,71 +314,96 @@ public class LittleSearchEngine {
 	 */
 	public ArrayList<String> top5search(String kw1, String kw2) {
 		/** COMPLETE THIS METHOD **/
+		
+		
+		
 		ArrayList<String> docsWithKeywords = new ArrayList<String>();
-		ArrayList<Occurrence> precedenceCheck = new ArrayList<Occurrence>();
+		ArrayList<Occurrence> kw1Occurrences = new ArrayList<Occurrence>();
+		ArrayList<Occurrence> kw2Occurrences = new ArrayList<Occurrence>();
 		boolean updateIsNeeded = false;
 		
-		//doesn't take into account repeat text files
+		
+		
 		kw1 = kw1.toLowerCase();
 		kw2 = kw2.toLowerCase();
 		
+
 		if(keywordsIndex.containsKey(kw1)) {
+			kw1Occurrences = keywordsIndex.get(kw1);
 			
-			for(Occurrence n:keywordsIndex.get(kw1)) {
+			for(Occurrence n: kw1Occurrences) {
 				if(docsWithKeywords.size() < 6) {
 					docsWithKeywords.add(n.document);
-					precedenceCheck.add(n);
 				}	
 			}
-		}
-		//start from the string of arraylists first
-		//if(docsWithKeywords.contains(k.document)
-		
-		if(keywordsIndex.containsKey(kw2)) {
-			//if kw1 was never found, this populates with kw2 occurrences instead
-			if(docsWithKeywords.isEmpty()) {
-				for(Occurrence k: keywordsIndex.get(kw2)) {
-					if(docsWithKeywords.size() < 6) {
-						docsWithKeywords.add(k.document);
-					}
-				}
-				
-			}
 			
-			//kw1 occurrences have to be mixed with kw2 occurrences
+		}
+		//Populates solely with kw2Occs if kw1Occs had NIL
+		if(keywordsIndex.containsKey(kw2)) {
+			kw2Occurrences = keywordsIndex.get(kw2);
+			
+			if(docsWithKeywords.isEmpty()) {
+				for(Occurrence m: kw2Occurrences) {
+					
+					if(docsWithKeywords.size() < 6) {
+						docsWithKeywords.add(m.document);
+					}
+				}	
+				return docsWithKeywords;
+			} 
+			
 			else {
 				updateIsNeeded = true;
-				for(Occurrence j: precedenceCheck) {
-					for(Occurrence x: keywordsIndex.get(kw2)) {
-						//move over with a higher frequency;
-						if(x.frequency > j.frequency) {
-							if(!x.document.equals(j.document)) {
-								for(Occurrence redundant: precedenceCheck) {
-									if(redundant.document.equals(x.document)) {
-										precedenceCheck.remove(redundant);
-									}
-								}
-								precedenceCheck.add(precedenceCheck.indexOf(j), x);
-								
-							} 
-						}
-						
-					}
-				}
 			}
-		}
-		if(updateIsNeeded) {
-			docsWithKeywords.clear();
-			for(Occurrence y: precedenceCheck) {
-				if(docsWithKeywords.size() < 6) {
-					docsWithKeywords.add(y.document);
-				}
-			}
+			
 		}
 		
+		ArrayList<Occurrence> sortedOccurrences = new ArrayList<Occurrence>();
+		
+		if(updateIsNeeded == true) {
+			
+			sortedOccurrences.addAll(kw1Occurrences);
+			sortedOccurrences.addAll(kw2Occurrences);
+			//clear to impose new precedence
+			docsWithKeywords.clear();
+			
+			Occurrence[] occurrenceArray = new Occurrence[sortedOccurrences.size()];
+			
+			int r = 0;
+			for(Occurrence a: sortedOccurrences) {
+				occurrenceArray[r] = a;
+				r++;
+			}
+			
+			//bubble sort on the occurrence array 
+			int arrayLength = occurrenceArray.length; 
+	        for (int i = 0; i < arrayLength-1; i++)  {
+	        	for (int j = 0; j < arrayLength-i-1; j++) {
+	            	if (occurrenceArray[j].frequency < occurrenceArray[j+1].frequency) { 
+	                    Occurrence temp = occurrenceArray[j]; 
+	                    occurrenceArray[j] = occurrenceArray[j + 1]; 
+	                    occurrenceArray[j + 1] = temp; 
+	                    
+	                } 
+	            }
+	        }
+	        
+	        for(int x = 0; x < occurrenceArray.length; x ++ ) {
+	        	String docRedundant = occurrenceArray[x].document;
+	        	
+	        	if(docsWithKeywords.size() < 6) {
+	        		if(!docsWithKeywords.contains(docRedundant)) {
+	        			docsWithKeywords.add(occurrenceArray[x].document);
+	        		}
+	        	}
+	        	
+	        	
+	        }
+		}
+				
 		if(docsWithKeywords.isEmpty()) { return null; }
 		return docsWithKeywords;
-	}
 	
 	}
+
 }

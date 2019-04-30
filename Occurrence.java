@@ -11,7 +11,9 @@ package lse;
 public class Occurrence {
 	
 	/**
+	 * 
 	 * Document in which a keyword occurs.
+	 * 
 	 */
 	String document;
 	
