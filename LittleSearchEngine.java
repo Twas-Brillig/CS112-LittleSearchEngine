@@ -6,7 +6,8 @@ import java.util.*;
 /**
  * This class builds an index of keywords. Each keyword maps to a set of pages in
  * which it occurs, with frequency of occurrence in each page.
-	 *’Twas brillig, and the slithy toves 
+ 
+	’Twas brillig, and the slithy toves 
 	      Did gyre and gimble in the wabe: 
 	All mimsy were the borogoves, 
 	      And the mome raths outgrabe. 
@@ -174,7 +175,7 @@ public class LittleSearchEngine {
 		String excluded = "-'@#$%^&*(){}[]~`";
 		String lowerCaseCheck = word.toLowerCase();
 		
-		boolean punctuationsAreLegal  = true;
+		
 		char[] wordAsCharArray = lowerCaseCheck.toCharArray();
 		
 		for(int i = 0; i < wordAsCharArray.length; i++) {
@@ -182,8 +183,9 @@ public class LittleSearchEngine {
 			if(punctuations.contains(Character.toString(wordAsCharArray[i])) &&
 			  (i + 1 < wordAsCharArray.length)) {
 				
+				//Checks if the positiion of the punctuations are legal
 				if(Character.isLetter(wordAsCharArray[i + 1])) {
-					punctuationsAreLegal = false;
+					return null;
 				}
 				
 			}
@@ -196,7 +198,6 @@ public class LittleSearchEngine {
 	
 		String edgeCaseCheck = lowerCaseCheck.replaceAll("\\s*\\p{Punct}+\\s*$", "");
 		if(!noiseWords.contains(edgeCaseCheck) && !word.matches(".*\\d.*")
-		   && punctuationsAreLegal 
 		   && edgeCaseCheck.chars().allMatch(Character::isLetter)) {	
 			
 			return edgeCaseCheck;
